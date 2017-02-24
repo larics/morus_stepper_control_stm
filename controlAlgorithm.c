@@ -34,8 +34,8 @@ void vTaskMotorController(void *pvParameters)
 	int32_t e				 = 0;			//Control error signal
 	TickType_t xLastWakeTime = xTaskGetTickCount();			//For vTaskDelay function 
 	motor_setup_t setupMsg;															//Container for received msg from motor setup queue
-	uint32_t setpointMsg;																//Container for received msg from motor setpoint queue 
-	
+	int32_t setpointMsg;																//Container for received msg from motor setpoint queue 
+	int32_t measMsg;
 	
 	//helper variables
 	int32_t delta = 0;						//Time delay between output compare ISR executions expresed in timer ticks, 
@@ -56,8 +56,8 @@ void vTaskMotorController(void *pvParameters)
 	{
 		//For control loop timing vTaskDelayUntil function is used for convenience and 
 		// it offers sufficient time accuracy
-		vTaskDelayUntil(&xLastWakeTime,2/portTICK_PERIOD_MS);
-		
+		vTaskDelayUntil(&xLastWakeTime,1000/(CONTROL_LOOP_FREQUENCY*portTICK_PERIOD_MS));
+
 		//Checking if there are new regulator setpoints in the setpoint queue
 		if(xQueueReceive(xQueueMotorSetup,(void *)&setupMsg,(TickType_t) 0) == pdTRUE)
 		{
@@ -73,6 +73,11 @@ void vTaskMotorController(void *pvParameters)
 		if(xQueueReceive( xQueueMotorSetpoint[motorNumber-1], (void *)&setpointMsg, (TickType_t) 0) == pdTRUE)
 		{
 			stepRef = setpointMsg;
+		}
+		//Checking if there is new measurement available in the queue 
+		if(xQueueReceive( xQueueMotorMeasurement[motorNumber-1], (void *)&measMsg, (TickType_t) 0) == pdTRUE)
+		{
+			setPulsCnt(measMsg, motorNumber);
 		}
 		
 		//Control algorithm (Proportinal regulator with rate limiting
@@ -224,10 +229,16 @@ void TIM4_IRQHandler(void)
 {
 	static BitAction bitValue = Bit_RESET;
 	static BitAction bitValue2 = Bit_RESET;
+	static BitAction bitValue3 = Bit_RESET;
+	static BitAction bitValue4 = Bit_RESET;
 	static int32_t delta			= PERIOD;
 	static int32_t delta2			= PERIOD;
+	static int32_t delta3			= PERIOD;
+	static int32_t delta4			= PERIOD;
 	static int16_t direction2 = 0;
-	static int16_t		direction = 0;
+	static int16_t direction3 = 0;
+	static int16_t direction4 = 0;
+	static int16_t direction = 0;
 	BaseType_t xTaskWokenByReceive = pdFALSE;
 	ISR_message_t	rxMsg;
 	uint32_t curTim;
@@ -247,7 +258,7 @@ void TIM4_IRQHandler(void)
 		if(delta != -1)
 		{
 			bitValue = (bitValue == Bit_RESET) ? Bit_SET : Bit_RESET;
-			GPIO_WriteBit(GPIOD , GPIO_Pin_12, bitValue);															//<------------- delete this in final form 
+			//GPIO_WriteBit(GPIOD , GPIO_Pin_12, bitValue);															//<------------- delete this in final form 
 			GPIO_WriteBit(MOTOR1_GPIOx, MOTOR1_STEP, bitValue);
 			
 			//Increment step counter, when direction is 0 there is no increment 
@@ -303,7 +314,7 @@ void TIM4_IRQHandler(void)
 		{
 			bitValue2 = (bitValue2 == Bit_RESET) ? Bit_SET : Bit_RESET;
 			GPIO_WriteBit(MOTOR2_GPIOx, MOTOR2_STEP, bitValue2);
-			GPIO_WriteBit(GPIOD , GPIO_Pin_13, bitValue);	
+			//GPIO_WriteBit(GPIOD , GPIO_Pin_13, bitValue);	
 			
 			if(bitValue2 == Bit_RESET)
 			{
@@ -328,6 +339,7 @@ void TIM4_IRQHandler(void)
 			GPIO_WriteBit(MOTOR2_GPIOx , MOTOR2_DIR , Bit_SET);
 		}
 		
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_12);
 		//Set next OC ISR time 
 		curTim = TIM_GetCounter(TIM4);
 		if (delta2 != -1)
@@ -342,6 +354,115 @@ void TIM4_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM4, TIM_IT_CC2);
 		
 	}
+	
+	//Check if CC3 caused interupt 
+	if(TIM_GetITStatus(TIM4,TIM_IT_CC3) != RESET)
+	{
+		if(xQueueReceiveFromISR(xQueueMotorISR[2], (void *)&rxMsg, &xTaskWokenByReceive) == pdTRUE)
+		{
+			delta3 		= rxMsg.delta;
+			direction3 = rxMsg.direction;
+		}
+		
+		if(delta3 != -1)
+		{
+			bitValue3 = (bitValue3 == Bit_RESET) ? Bit_SET : Bit_RESET;
+			GPIO_WriteBit(MOTOR3_GPIOx, MOTOR3_STEP, bitValue3);
+			//GPIO_WriteBit(GPIOD , GPIO_Pin_13, bitValue);	
+			
+			if(bitValue3 == Bit_RESET)
+			{
+				if(direction3 == 1)
+				{
+					pulsCnt3 = pulsCnt3 + 1;
+				}
+				else if (direction3 == -1)
+				{
+					pulsCnt3 = pulsCnt3 - 1;
+				}
+			}
+		}
+		
+		//Set direction pin properly
+		if(direction3 == 1)
+		{
+			GPIO_WriteBit(MOTOR3_GPIOx , MOTOR3_DIR , Bit_RESET);
+		}
+		else if(direction3 == -1)
+		{
+			GPIO_WriteBit(MOTOR3_GPIOx , MOTOR3_DIR , Bit_SET);
+		}
+		
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
+		//Set next OC ISR time 
+		curTim = TIM_GetCounter(TIM4);
+		if (delta3 != -1)
+		{
+			TIM_SetCompare3(TIM4,(curTim+delta3)%PERIOD);
+		}
+		else
+		{
+			TIM_SetCompare3(TIM4,(curTim+PERIOD)%PERIOD);
+		}
+		//Clear pending bit
+		TIM_ClearITPendingBit(TIM4, TIM_IT_CC3);
+		
+	}
+	
+	//Check if CC4 caused interupt 
+	if(TIM_GetITStatus(TIM4,TIM_IT_CC4) != RESET)
+	{
+		if(xQueueReceiveFromISR(xQueueMotorISR[3], (void *)&rxMsg, &xTaskWokenByReceive) == pdTRUE)
+		{
+			delta4 		= rxMsg.delta;
+			direction4 = rxMsg.direction;
+		}
+		
+		if(delta4 != -1)
+		{
+			bitValue4 = (bitValue4 == Bit_RESET) ? Bit_SET : Bit_RESET;
+			GPIO_WriteBit(MOTOR4_GPIOx, MOTOR4_STEP, bitValue4);
+			//GPIO_WriteBit(GPIOD , GPIO_Pin_13, bitValue);	
+			
+			if(bitValue4 == Bit_RESET)
+			{
+				if(direction4 == 1)
+				{
+					pulsCnt4 = pulsCnt4 + 1;
+				}
+				else if (direction4 == -1)
+				{
+					pulsCnt4 = pulsCnt4 - 1;
+				}
+			}
+		}
+		
+		//Set direction pin properly
+		if(direction4 == 1)
+		{
+			GPIO_WriteBit(MOTOR4_GPIOx , MOTOR4_DIR , Bit_RESET);
+		}
+		else if(direction4 == -1)
+		{
+			GPIO_WriteBit(MOTOR4_GPIOx , MOTOR4_DIR , Bit_SET);
+		}
+		
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_14);
+		//Set next OC ISR time 
+		curTim = TIM_GetCounter(TIM4);
+		if (delta4 != -1)
+		{
+			TIM_SetCompare4(TIM4,(curTim+delta4)%PERIOD);
+		}
+		else
+		{
+			TIM_SetCompare4(TIM4,(curTim+PERIOD)%PERIOD);
+		}
+		//Clear pending bit
+		TIM_ClearITPendingBit(TIM4, TIM_IT_CC4);
+		
+	}
+
 	//Call task scheduler if there is a task unblocked by reading from queue 
 	//In this project it isn't necessary but we included it for completeness
 	if( xTaskWokenByReceive != pdFALSE)
@@ -383,4 +504,26 @@ int32_t getPulsCnt(uint32_t num)
 	#endif
 	NVIC_EnableIRQ(TIM4_IRQn);
 	return ret;
+}
+
+void setPulsCnt(int32_t count, uint32_t num)
+{
+	NVIC_DisableIRQ(TIM4_IRQn);
+	if(num == 1)
+	{
+		pulsCnt1 = count;
+	}
+	if(num == 2)
+	{
+		pulsCnt2 = count;
+	}
+	if(num == 3)
+	{
+		pulsCnt3 = count;
+	}
+	if(num == 4)
+	{
+		pulsCnt4 = count;	
+	}
+	NVIC_EnableIRQ(TIM4_IRQn);
 }

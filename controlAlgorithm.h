@@ -29,6 +29,7 @@ typedef struct
 	extern xQueueHandle xQueueMotorISR[4];
 	//Queue for passing controller setup message from UART to motor controllers 
 	extern xQueueHandle xQueueMotorSetup;
+	extern xQueueHandle xQueueMotorMeasurement[4];
 	
 	
 //Function declarations
@@ -43,6 +44,7 @@ typedef struct
 	
 	//Crtitical section in reading pulse count
 	int32_t getPulsCnt(uint32_t num);
+	void setPulsCnt(int32_t count, uint32_t num);
 
 
 #endif

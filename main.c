@@ -39,6 +39,7 @@ configASSERT( 0 ); // Latch on any failure / error.
 //Queue Handles
  xQueueHandle xQueueMotorISR[4];
  xQueueHandle xQueueMotorSetpoint[4];
+ xQueueHandle xQueueMotorMeasurement[4];
  xQueueHandle xQueueMotorSetup;
 
 int main(void)
@@ -52,15 +53,19 @@ int main(void)
 	//Queue for setup task
 	xQueueMotorSetup = xQueueCreate(3, sizeof(motor_setup_t));
 	//Queues for setpoint tasks 
-	xQueueMotorSetpoint[0] = xQueueCreate(1, sizeof(uint32_t));
-	xQueueMotorSetpoint[1] = xQueueCreate(1, sizeof(uint32_t));
-	xQueueMotorSetpoint[2] = xQueueCreate(1, sizeof(uint32_t));
-	xQueueMotorSetpoint[3] = xQueueCreate(1, sizeof(uint32_t));
+	xQueueMotorSetpoint[0] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorSetpoint[1] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorSetpoint[2] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorSetpoint[3] = xQueueCreate(1, sizeof(int32_t));
 	//Queues for timer output compare ISR 
 	xQueueMotorISR[0] = xQueueCreate(1, sizeof(ISR_message_t));
 	xQueueMotorISR[1] = xQueueCreate(1, sizeof(ISR_message_t));
 	xQueueMotorISR[2] = xQueueCreate(1, sizeof(ISR_message_t));
 	xQueueMotorISR[3] = xQueueCreate(1, sizeof(ISR_message_t));
+	xQueueMotorMeasurement[0] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorMeasurement[1] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorMeasurement[2] = xQueueCreate(1, sizeof(int32_t));
+	xQueueMotorMeasurement[3] = xQueueCreate(1, sizeof(int32_t));
 	
 	//It is recomended to set all priority bits to preempt priority when using FreeRTOS 
 	// on STM32 devices
@@ -95,14 +100,31 @@ int main(void)
 			2,
 			NULL); 
 		
-		/*xTaskCreate(
+		xTaskCreate(
 			 vTaskMotorController,
 			(const char*)"MOTOR2_TASK",
 			configMINIMAL_STACK_SIZE,
 			(void *)2,
 			2,
 			NULL); 
-			*/
+
+		xTaskCreate(
+			 vTaskMotorController,
+			(const char*)"MOTOR3_TASK",
+			configMINIMAL_STACK_SIZE,
+			(void *)3,
+			2,
+			NULL); 
+
+			
+		xTaskCreate(
+			 vTaskMotorController,
+			(const char*)"MOTOR4_TASK",
+			configMINIMAL_STACK_SIZE,
+			(void *)4,
+			2,
+			NULL); 
+
 	//run task scheduler
 		vTaskStartScheduler();
 	//While(1) for safety

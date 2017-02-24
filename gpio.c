@@ -22,6 +22,9 @@ void gpio_init(void)
 	//Orange LED
 	GPIOStruct.GPIO_Pin    	= GPIO_Pin_13;
 	GPIO_Init(GPIOD,&GPIOStruct);
+	//Orange LED
+	GPIOStruct.GPIO_Pin    	= GPIO_Pin_14;
+	GPIO_Init(GPIOD,&GPIOStruct);
 	
 	RCC_AHB1PeriphClockCmd(MOTOR1_RCC_GPIOx, ENABLE);
 		//Dir pin
@@ -30,12 +33,14 @@ void gpio_init(void)
 		//Step pin
 		GPIOStruct.GPIO_Pin 	= MOTOR1_STEP;
 		GPIO_Init(MOTOR1_GPIOx, &GPIOStruct);
-		//MS1
-		GPIOStruct.GPIO_Pin 	= MOTOR1_MS1;
+		
+		//Dir pin
+		GPIOStruct.GPIO_Pin 	= MOTOR3_DIR;
 		GPIO_Init(MOTOR1_GPIOx, &GPIOStruct);
-		//MS2
-		GPIOStruct.GPIO_Pin 	= MOTOR1_MS2;
+		//Step pin
+		GPIOStruct.GPIO_Pin 	= MOTOR3_STEP;
 		GPIO_Init(MOTOR1_GPIOx, &GPIOStruct);
+		
 		//MS3
 		GPIOStruct.GPIO_Pin 	= MOTOR1_MS3;
 		GPIO_Init(MOTOR1_GPIOx, &GPIOStruct);
@@ -46,9 +51,8 @@ void gpio_init(void)
 		
 		//Reset dir pin
 		GPIO_WriteBit(MOTOR1_GPIOx, MOTOR1_DIR, Bit_RESET);
+		GPIO_WriteBit(MOTOR1_GPIOx, MOTOR3_DIR, Bit_RESET);
 		//Setting stepper driver in half step mode (400 pulses per revolution)
-		GPIO_WriteBit(MOTOR1_GPIOx, MOTOR1_MS1, Bit_SET);
-		GPIO_WriteBit(MOTOR1_GPIOx, MOTOR1_MS2, Bit_RESET);
 		GPIO_WriteBit(MOTOR1_GPIOx, MOTOR1_MS3, Bit_RESET);
 		
 	//Motor 2 pin init 
@@ -60,10 +64,10 @@ void gpio_init(void)
 		GPIOStruct.GPIO_Pin = MOTOR2_STEP;
 		GPIO_Init(MOTOR2_GPIOx, &GPIOStruct);
 		//MS1 motor2
-		GPIOStruct.GPIO_Pin = MOTOR2_MS1;
+		GPIOStruct.GPIO_Pin = MOTOR4_DIR;
 		GPIO_Init(MOTOR2_GPIOx, &GPIOStruct);
-		//MS2 motor2
-		GPIOStruct.GPIO_Pin = MOTOR2_MS2;
+		//Step pin motor2
+		GPIOStruct.GPIO_Pin = MOTOR4_STEP;
 		GPIO_Init(MOTOR2_GPIOx, &GPIOStruct);
 		//MS3 motor2  
 		GPIOStruct.GPIO_Pin = MOTOR2_MS3;
@@ -71,8 +75,8 @@ void gpio_init(void)
 		
 		//Reset dir pin
 		GPIO_WriteBit(MOTOR2_GPIOx, MOTOR2_DIR, Bit_RESET);
+		GPIO_WriteBit(MOTOR2_GPIOx, MOTOR4_DIR, Bit_RESET);
 		//Setting stepper driver in half step mode (400 pulses per revolution)
-		GPIO_WriteBit(MOTOR2_GPIOx, MOTOR2_MS1, Bit_SET);
-		GPIO_WriteBit(MOTOR2_GPIOx, MOTOR2_MS2, Bit_RESET);
+
 		GPIO_WriteBit(MOTOR2_GPIOx, MOTOR2_MS3, Bit_RESET);
 }

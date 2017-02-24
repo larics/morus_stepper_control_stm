@@ -41,12 +41,15 @@ void TimerInit(void)
 	
 	//Configuring timer interrupt sources 
 	TIM_ClearITPendingBit(TIM4,TIM_IT_CC1);
+	TIM_ClearITPendingBit(TIM4,TIM_IT_CC2);
+	TIM_ClearITPendingBit(TIM4,TIM_IT_CC3);
+	TIM_ClearITPendingBit(TIM4,TIM_IT_CC4);
 	TIM_SetCounter(TIM4,0);
 	TIM_ITConfig(TIM4,TIM_IT_CC1,ENABLE);
 	TIM_ITConfig(TIM4,TIM_IT_Update, DISABLE);
 	TIM_ITConfig(TIM4,TIM_IT_CC2, ENABLE);
-	TIM_ITConfig(TIM4,TIM_IT_CC3, DISABLE);
-	TIM_ITConfig(TIM4,TIM_IT_CC4, DISABLE);
+	TIM_ITConfig(TIM4,TIM_IT_CC3, ENABLE);
+	TIM_ITConfig(TIM4,TIM_IT_CC4, ENABLE);
 	
 	//Enable TIM4 interupt in NVIC
 	
