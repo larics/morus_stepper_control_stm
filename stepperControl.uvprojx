@@ -371,7 +371,7 @@
             <vShortWch>1</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32F40_41xxx, USE_STDPERIPH_DRIVER, HSE_VALUE=8000000</Define>
+              <Define>STM32F40_41xxx, USE_STDPERIPH_DRIVER, HSE_VALUE=8000000, FULL_SETUP=1</Define>
               <Undefine></Undefine>
               <IncludePath>.\; Lib\CMSIS\Include; Lib\CMSIS\Device\ST\STM32F4xx\Include; Lib\STM32F4xx_StdPeriph_Driver\inc; FreeRTOS\include; FreeRTOS\portable\keil\ARM_CM4F</IncludePath>
             </VariousControls>

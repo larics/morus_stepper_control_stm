@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\motorController.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\motorController.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060020: Last Updated: Fri Feb 24 10:20:29 2017
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Sat Feb 25 10:44:50 2017
 <BR><P>
 <H3>Maximum Stack Usage =        240 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -926,7 +926,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[73]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[73]"></a>main</STRONG> (Thumb, 312 bytes, Stack size 16 bytes, main.o(i.main))
+<P><STRONG><a name="[73]"></a>main</STRONG> (Thumb, 354 bytes, Stack size 16 bytes, main.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 184 + Unknown Stack Size
 <LI>Call Chain = main &rArr; vTaskStartScheduler &rArr; xTimerCreateTimerTask &rArr; xTaskCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick
 </UL>
@@ -1010,7 +1010,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskIncrementTick
 </UL>
 
-<P><STRONG><a name="[60]"></a>vDecodeMsgTask</STRONG> (Thumb, 252 bytes, Stack size 40 bytes, usart.o(i.vDecodeMsgTask))
+<P><STRONG><a name="[60]"></a>vDecodeMsgTask</STRONG> (Thumb, 296 bytes, Stack size 40 bytes, usart.o(i.vDecodeMsgTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 144<LI>Call Chain = vDecodeMsgTask &rArr; xQueueGenericSend &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[dd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xQueueGenericSend
@@ -1136,7 +1136,7 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[d4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;prvUnlockQueue
 </UL>
 
-<P><STRONG><a name="[61]"></a>vTaskMotorController</STRONG> (Thumb, 576 bytes, Stack size 72 bytes, controlalgorithm.o(i.vTaskMotorController))
+<P><STRONG><a name="[61]"></a>vTaskMotorController</STRONG> (Thumb, 580 bytes, Stack size 72 bytes, controlalgorithm.o(i.vTaskMotorController))
 <BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = vTaskMotorController &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskGetTickCount

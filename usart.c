@@ -208,9 +208,18 @@ void vDecodeMsgTask(void *pvParameters)
 						setupCmd.rLim = data.broj.moto3;
 						setupCmd.dLim = data.broj.moto4;
 					//Add to queue without blocking 
-					xQueueSendToBack( xQueueMotorSetup,
+					xQueueSendToBack( xQueueMotorSetup[0],
 														(void *)&setupCmd,
 														(TickType_t)0);
+					xQueueSendToBack( xQueueMotorSetup[1],
+					(void *)&setupCmd,
+					(TickType_t)0);
+					xQueueSendToBack( xQueueMotorSetup[2],
+														(void *)&setupCmd,
+														(TickType_t)0);
+					xQueueSendToBack( xQueueMotorSetup[3],
+					(void *)&setupCmd,
+					(TickType_t)0);
 				break;
 			}
 			case('M'):
