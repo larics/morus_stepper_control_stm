@@ -52,3 +52,4 @@
 .\objects\main.o: .\timer.h
 .\objects\main.o: .\gpio.h
 .\objects\main.o: .\controlAlgorithm.h
+.\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h

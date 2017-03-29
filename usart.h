@@ -50,7 +50,7 @@ typedef struct
 	uint32_t P;
 	uint32_t wMax;
 	uint32_t rLim;
-	uint32_t dLim;
+	uint32_t dead_zone;
 }	motor_setup_t;
 
 struct __FILE

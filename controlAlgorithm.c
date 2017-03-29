@@ -19,10 +19,9 @@ void vTaskMotorController(void *pvParameters)
 	//Default controler params
 	float P = 10.0;
 	int32_t rLim = 50000;  // pps/s  -> 2000 rpm/s for 1600 cnt 
-	int32_t dLim	=	50000;	// pps/s -> 2000 rpm/s for 1600 cnt
 	int32_t wMax	= 800;	// pps	-> 300 rpm for 1600 cnt
 	int32_t rLim_l = rLim / CONTROL_LOOP_FREQUENCY; // allowable increment in a single loop
-	int32_t dLim_l = dLim / CONTROL_LOOP_FREQUENCY; // allowable decrement in a single loop
+	int32_t dead_zone = 20;
 	
 	//Position and angular velocity 
 	int32_t stepAct  = 0;			//Actual step count of motor [pulse]
@@ -65,9 +64,8 @@ void vTaskMotorController(void *pvParameters)
 			P = setupMsg.P;
 			wMax = setupMsg.wMax;
 			rLim = setupMsg.rLim;
-			dLim = setupMsg.dLim;
+			dead_zone = setupMsg.dead_zone;
 			rLim_l = rLim / CONTROL_LOOP_FREQUENCY;
-			dLim_l = dLim / CONTROL_LOOP_FREQUENCY;
 		}
 		//Checking if there is new setpoint available in the queue 
 		if(xQueueReceive( xQueueMotorSetpoint[motorNumber-1], (void *)&setpointMsg, (TickType_t) 0) == pdTRUE)
@@ -85,6 +83,18 @@ void vTaskMotorController(void *pvParameters)
 		stepAct = getPulsCnt(motorNumber);
 		//Control error signal
 		e = stepRef-stepAct;
+		
+		// implement dead zone
+		if (fabs(e) < dead_zone) {
+			e = 0;
+		}
+		else if (e > 0) {
+			e = e - dead_zone;
+		}
+		else {
+			e = e + dead_zone;
+		}
+		
 		//referent velocity 
 		wRef = e*P;
 		
@@ -93,9 +103,9 @@ void vTaskMotorController(void *pvParameters)
 		{
 			wNew = wAct+rLim_l;
 		}
-		else if((wAct - wRef) > dLim_l)
+		else if((wAct - wRef) > rLim_l)
 		{
-			wNew = wAct-dLim_l;
+			wNew = wAct-rLim_l;
 		}
 		else
 		{

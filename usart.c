@@ -206,7 +206,7 @@ void vDecodeMsgTask(void *pvParameters)
 						setupCmd.P 		= data.broj.moto1;
 						setupCmd.wMax = data.broj.moto2;
 						setupCmd.rLim = data.broj.moto3;
-						setupCmd.dLim = data.broj.moto4;
+						setupCmd.dead_zone = data.broj.moto4;
 					//Add to queue without blocking 
 					xQueueSendToBack( xQueueMotorSetup[0],
 														(void *)&setupCmd,

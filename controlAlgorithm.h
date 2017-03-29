@@ -12,6 +12,7 @@
 #include <timer.h>
 #include <usart.h>
 #include <gpio.h>
+#include <math.h>
 
 //Typedefed message structs:
 typedef struct
